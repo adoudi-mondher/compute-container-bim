@@ -1,0 +1,19 @@
+# Environnement virtuel Python
+.venv/
+venv/
+
+# Cache Python
+__pycache__/
+*.pyc
+
+# Variables d'environnement et secrets
+.env
+
+# Fichiers de sauvegarde Blender
+*.blend1
+
+# Éditeurs et système
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
