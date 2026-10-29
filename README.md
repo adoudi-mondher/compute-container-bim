@@ -1,10 +1,12 @@
 # compute-container-bim
 
-Maquette BIM d'un conteneur de calcul (20 ft), enrichie et pilotée par scripts Python.
+Maquette BIM d'un conteneur de calcul (20 ft), générée et enrichie par scripts Python.
 
 > Projet personnel d'apprentissage, indépendant. Non affilié à Policloud ni à Antimatter.
 > Les données d'exemple proviennent des spécifications publiques du modèle Policloud 100
 > (policloud.com, consulté le 27/10/2026).
+
+![Conteneur en coque creuse généré par script, ouvert dans Blender avec Bonsai](docs/coque-blender.png)
 
 ## Pourquoi ce projet
 
@@ -17,13 +19,24 @@ de puissance de calcul, puis d'automatiser par script ce qui se fait d'habitude 
 
 ## Ce que le projet contient aujourd'hui
 
+**Version 1 : volume simple, fait à la main**
 - Un modèle IFC4 d'un conteneur 20 ft (6,058 x 2,438 x 2,591 m), créé avec Blender et Bonsai.
-  Il s'agit d'un volume simple, sans détail interne.
-- `scripts/lire_ifc.py` : lit un fichier IFC et affiche pour chaque élément son nom, sa classe
-  IFC, sa position et ses dimensions.
+  C'est un bloc plein, sans détail interne.
 - `scripts/ajouter_proprietes.py` : ajoute un jeu de propriétés `Policloud` au conteneur
   (puissance max, GPU, vCPU, stockage, plage de température, emprise au sol, refroidissement)
   et enregistre le résultat dans un nouveau fichier, sans toucher à l'original.
+
+**Version 2 : coque creuse, entièrement générée par code**
+- `scripts/creer_conteneur.py` : crée de zéro un fichier IFC4 avec la hiérarchie
+  projet / site / bâtiment / niveau, puis un conteneur composé de 6 pièces (sol, toit,
+  2 longs murs, 2 murs de bout, parois de 10 cm), regroupées sous un `IfcElementAssembly`.
+  Les propriétés de calcul sont portées par l'assemblage.
+- La fonction `creer_conteneur(...)` prend une position (x, y, z) : elle pourra être appelée
+  plusieurs fois pour placer plusieurs unités.
+
+**Outil de contrôle**
+- `scripts/lire_ifc.py` : lit un fichier IFC et affiche pour chaque élément son nom, sa classe
+  IFC, sa position et ses dimensions.
 
 ## Structure
 
@@ -31,10 +44,15 @@ de puissance de calcul, puis d'automatiser par script ce qui se fait d'habitude 
 compute-container-bim/
 ├── scripts/
 │   ├── lire_ifc.py
-│   └── ajouter_proprietes.py
+│   ├── ajouter_proprietes.py
+│   └── creer_conteneur.py
 ├── models/
-│   ├── policloud-container-20ft.ifc          modèle d'origine
-│   └── policloud-container-20ft-enrichi.ifc  modèle avec propriétés
+│   ├── policloud-container-20ft.ifc          v1 : bloc, fait à la main
+│   ├── policloud-container-20ft-enrichi.ifc  v1 avec propriétés
+│   └── compute-container-20ft-v2.ifc         v2 : coque creuse, générée par script
+├── docs/
+│   └── coque-blender.png
+├── LICENSE
 ├── requirements.txt
 └── README.md
 ```
@@ -52,15 +70,17 @@ pip install -r requirements.txt
 ## Utilisation
 
 ```bash
-# Lire le modèle
-python scripts/lire_ifc.py
+# Générer la coque creuse (écrase models/compute-container-20ft-v2.ifc)
+python scripts/creer_conteneur.py
 
-# Lire un autre fichier
-python scripts/lire_ifc.py models/policloud-container-20ft-enrichi.ifc
+# Contrôler le résultat
+python scripts/lire_ifc.py models/compute-container-20ft-v2.ifc
 
-# Ajouter les propriétés de calcul
+# Ajouter les propriétés de calcul à la version 1
 python scripts/ajouter_proprietes.py
 ```
+
+Les fichiers `.ifc` s'ouvrent dans Blender avec l'extension Bonsai (*Open IFC Project*).
 
 ## Propriétés ajoutées (jeu `Policloud`)
 
@@ -78,13 +98,14 @@ python scripts/ajouter_proprietes.py
 
 ## Limites connues
 
-- Le modèle 3D est un volume simplifié : l'agencement interne réel n'est pas public.
-- Les scripts ont été testés uniquement sur ce modèle.
+- La coque est une représentation simplifiée : parois de 10 cm, sans portes ni ouvertures,
+  sans agencement interne (il n'est pas public).
+- Les scripts ont été testés uniquement sur ces modèles.
 - Les valeurs sont celles annoncées par le fabricant, non vérifiées de façon indépendante.
 
 ## Pistes suivantes
 
-- Conteneur en coque creuse (sol, parois, toit) avec portes, sous un élément parent unique.
+- Portes et ouvertures sur un mur de bout (cotes illustratives).
 - Implantation de N unités sur un terrain (50 m² par unité) avec calcul automatique de la
   puissance totale, du nombre de GPU et de l'emprise du site.
 - Contrôles automatiques (propriétés obligatoires, cohérence des dimensions).
@@ -92,3 +113,7 @@ python scripts/ajouter_proprietes.py
 ## Outils
 
 Blender 5.2 LTS, Bonsai 0.9 (extension BIM), IfcOpenShell 0.9, Python 3.12.
+
+## Licence
+
+MIT, voir le fichier `LICENSE`.
