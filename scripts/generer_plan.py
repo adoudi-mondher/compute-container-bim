@@ -39,6 +39,7 @@ STYLES = {
     "IfcAirTerminal": ("#4fa3b8", "#202124"),
     "IfcElectricDistributionBoard": ("#b39ddb", "#202124"),
     "IfcFireSuppressionTerminal": ("#d93025", "#202124"),
+    "IfcCableCarrierSegment": ("#c9a227", "#202124"),
 }
 STYLE_PAR_DEFAUT = ("#bdc1c6", "#202124")
 

@@ -77,6 +77,12 @@ LUMINAIRE_LONGUEUR = 1.2
 LUMINAIRE_LARGEUR = 0.1
 LUMINAIRE_HAUTEUR = 0.06
 
+# Chemin de câbles sous le toit, au-dessus des baies et de l'armoire (cotes illustratives)
+CHEMIN_CABLES_LARGEUR = 0.3   # en travers du conteneur (axe Y)
+CHEMIN_CABLES_HAUTEUR = 0.05
+CHEMIN_CABLES_Z = 2.2         # hauteur du dessous du chemin, depuis le dessous du conteneur
+CHEMIN_CABLES_RETRAIT_FOND = 0.1   # distance entre le chemin et le mur de bout A
+
 NOTE_ILLUSTRATIF = "Cotes illustratives, non issues du fabricant."
 
 # Caractéristiques du Policloud 100 (spécifications publiques du fabricant)
@@ -217,12 +223,17 @@ def verifier_dimensions(longueur, largeur, hauteur, epaisseur):
         raise ValueError("L'extincteur gêne les baies.")
     if NB_LUMINAIRES * LUMINAIRE_LONGUEUR > 2 * x_int:
         raise ValueError("Trop de luminaires pour la longueur du plafond.")
+    # Le chemin de câbles passe au-dessus des baies et de l'armoire, sous le toit
+    if CHEMIN_CABLES_Z < epaisseur + max(BAIE_HAUTEUR, ARMOIRE_HAUTEUR):
+        raise ValueError("Le chemin de câbles heurte les baies ou l'armoire.")
+    if CHEMIN_CABLES_Z + CHEMIN_CABLES_HAUTEUR > hauteur - epaisseur:
+        raise ValueError("Le chemin de câbles dépasse sous le toit.")
 
 
 def creer_conteneur(modele, corps, niveau, nom, longueur, largeur, hauteur,
                     epaisseur, x=0.0, y=0.0, z=0.0):
     """
-    Crée un conteneur creux (coque + porte + baies + ventilation + équipements) dont le centre de la face
+    Crée un conteneur creux (coque + porte + baies + ventilation + équipements + câblage) dont le centre de la face
     inférieure est en (x, y, z). Retourne l'assemblage.
     """
     verifier_dimensions(longueur, largeur, hauteur, epaisseur)
@@ -340,6 +351,15 @@ def creer_conteneur(modele, corps, niveau, nom, longueur, largeur, hauteur,
         luminaire.Description = NOTE_ILLUSTRATIF
         pieces.append(luminaire)
 
+    # --- Chemin de câbles : du fond jusqu'près du mur de bout A, au-dessus des baies ---
+    x_debut = -x_int + JEU_FOND
+    x_fin = x_int - CHEMIN_CABLES_RETRAIT_FOND
+    chemin_cables = boite("IfcCableCarrierSegment", "Chemin de câbles (illustratif)",
+                          x_fin - x_debut, CHEMIN_CABLES_LARGEUR, CHEMIN_CABLES_HAUTEUR,
+                          (x_debut + x_fin) / 2, y_baie, CHEMIN_CABLES_Z, "CABLETRAYSEGMENT")
+    chemin_cables.Description = NOTE_ILLUSTRATIF
+    pieces.append(chemin_cables)
+
     # Assemblage parent : le conteneur est UN objet logique composé de ses parties
     assemblage = ifcopenshell.api.root.create_entity(
         modele, ifc_class="IfcElementAssembly", name=nom
@@ -378,6 +398,7 @@ def main():
           f"armoires : {len(modele.by_type('IfcElectricDistributionBoard'))}, "
           f"extincteurs : {len(modele.by_type('IfcFireSuppressionTerminal'))}, "
           f"luminaires : {len(modele.by_type('IfcLightFixture'))}, "
+          f"chemins de câbles : {len(modele.by_type('IfcCableCarrierSegment'))}, "
           f"assemblages : {len(modele.by_type('IfcElementAssembly'))}")
 
 
