@@ -34,13 +34,19 @@ de puissance de calcul, puis d'automatiser par script ce qui se fait d'habitude 
 - Une porte de service (1,0 x 2,0 m) dans un mur de bout : le mur est percé
   (`IfcOpeningElement` + `IfcRelVoidsElement`) puis rempli par la porte (`IfcRelFillsElement`).
 - 8 baies informatiques illustratives (0,6 x 1,07 x 2,0 m, format 42U) alignées contre un long mur.
+- Refroidissement par air : 4 grilles de ventilation (`IfcAirTerminal`) dans l'autre long mur,
+  côté couloir, et 2 ventilateurs d'extraction (`IfcFan`) sur le toit, au-dessus des baies. Les
+  murs et le toit sont percés sous chaque équipement.
+- Équipements du couloir, côté porte : une armoire électrique (`IfcElectricDistributionBoard`),
+  un extincteur (`IfcFireSuppressionTerminal`, type `USERDEFINED` car IFC4 n'a pas de type
+  extincteur) et 3 luminaires (`IfcLightFixture`) au plafond.
 - La fonction `creer_conteneur(...)` prend une position (x, y, z) : elle pourra être appelée
   plusieurs fois pour placer plusieurs unités.
 
 **Plan en coupe**
 - `scripts/generer_plan.py` : coupe le modèle IFC à une hauteur donnée (1,50 m par défaut) et
-  dessine le plan vu de dessus en SVG : murs, baies B1 à B8, porte, échelle graphique et
-  dimensions hors tout. Il ne lit que les éléments extrudés depuis un rectangle, ce qui est le
+  dessine le plan vu de dessus en SVG : murs, baies B1 à B8, porte, grilles, armoire,
+  extincteur, échelle graphique et dimensions hors tout. Il ne lit que les éléments extrudés depuis un rectangle, ce qui est le
   cas de tout ce que produit `creer_conteneur.py`.
 
 ![Plan en coupe horizontale à 1,50 m](docs/plan-coupe.svg)
@@ -143,8 +149,13 @@ réécrit le fichier IFC.
 
 - La coque est une représentation simplifiée : parois de 10 cm, une seule porte, pas de
   ventilation ni de climatisation.
-- L'agencement interne (baies, porte) est **illustratif** : cotes de racks standard 42U, non
-  issues du fabricant, dont l'agencement n'est pas public.
+- L'agencement interne (baies, porte, ventilation, armoire, extincteur, luminaires) est
+  **illustratif** : cotes de racks standard 42U et d'équipements courants, non issues du
+  fabricant, dont l'agencement n'est pas public.
+- Avec les ventilateurs, la hauteur hors tout dépasse le gabarit ISO (2,791 m contre 2,591 m) :
+  en réalité, ils seraient démontables pour le transport.
+- La porte est un simple panneau, sans sens d'ouverture : aucun contrôle de conflit avec
+  l'armoire.
 - `generer_plan.py` ne lit pas les maillages faits à la main (version 1).
 - Le calcul de puissance est linéaire (N x puissance d'une unité) : il ne tient compte ni des
   pertes, ni du refroidissement, ni du réseau, et n'applique aucune marge de sécurité.
