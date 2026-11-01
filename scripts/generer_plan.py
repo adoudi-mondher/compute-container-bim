@@ -147,7 +147,8 @@ def ecrire_svg(formes, hauteur, chemin_sortie):
                 f'<polygon points="{points}" fill="{remplissage}" '
                 f'stroke="{contour}" stroke-width="1.5"/>'
             )
-        texte = etiquette(element)
+        # À petite échelle, les étiquettes se chevauchent : on ne les dessine que si lisibles
+        texte = etiquette(element) if ECHELLE >= 60 else ""
         if texte:
             cx, cy = pixel(polygone.centroid.x, polygone.centroid.y)
             couleur = "#ffffff" if element.is_a("IfcBuildingElementProxy") else "#202124"
@@ -182,11 +183,14 @@ def ecrire_svg(formes, hauteur, chemin_sortie):
 
 
 def main():
+    global ECHELLE   # modifiée par l'option --echelle
     parseur = argparse.ArgumentParser(description="Coupe en plan d'un fichier IFC, en SVG.")
     parseur.add_argument("fichier", nargs="?", default=FICHIER_PAR_DEFAUT, help="fichier IFC à couper")
     parseur.add_argument("--hauteur", type=float, default=1.5, help="hauteur de coupe en mètres")
     parseur.add_argument("--sortie", default=SORTIE_PAR_DEFAUT, help="fichier SVG à écrire")
+    parseur.add_argument("--echelle", type=float, default=ECHELLE, help="pixels par mètre")
     args = parseur.parse_args()
+    ECHELLE = args.echelle
 
     try:
         modele = ifcopenshell.open(args.fichier)
