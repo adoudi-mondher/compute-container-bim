@@ -47,6 +47,19 @@ BAIE_PROFONDEUR = 1.07  # en travers du conteneur (axe Y)
 BAIE_HAUTEUR = 2.0
 JEU_FOND = 0.05         # jeu entre la première baie et le mur de fond
 
+# Grilles de ventilation (entrée d'air) dans le long mur A, côté couloir (cotes illustratives)
+NB_GRILLES = 4
+GRILLE_LARGEUR = 0.8     # le long du conteneur (axe X)
+GRILLE_HAUTEUR = 0.5
+GRILLE_EPAISSEUR = 0.05
+GRILLE_Z = 1.4           # hauteur du bas de la grille, depuis le dessous du conteneur
+
+# Ventilateurs d'extraction sur le toit, au-dessus des baies (cotes illustratives)
+NB_VENTILATEURS = 2
+VENTILATEUR_COTE = 0.7   # carré de 0,7 m de côté
+VENTILATEUR_HAUTEUR = 0.2
+VENTILATEUR_OUVERTURE = 0.5   # trou dans le toit, sous le ventilateur
+
 NOTE_ILLUSTRATIF = "Cotes illustratives, non issues du fabricant."
 
 # Caractéristiques du Policloud 100 (spécifications publiques du fabricant)
@@ -139,24 +152,29 @@ def creer_boite(modele, corps, niveau, classe_ifc, nom, dx, dy, dz, x, y, z,
     return element
 
 
+def percer(modele, element, ouverture):
+    """Relie une ouverture à un élément (mur, dalle) : l'élément est percé (IfcRelVoidsElement)."""
+    modele.create_entity(
+        "IfcRelVoidsElement", GlobalId=ifcopenshell.guid.new(),
+        RelatingBuildingElement=element, RelatedOpeningElement=ouverture,
+    )
+
+
 def percer_et_remplir(modele, mur, ouverture, porte):
     """
     Relie une ouverture à un mur (le mur est percé) et une porte à l'ouverture
     (la porte remplit le trou). On crée les deux relations IFC directement :
     IfcRelVoidsElement (mur -> ouverture) et IfcRelFillsElement (ouverture -> porte).
     """
-    modele.create_entity(
-        "IfcRelVoidsElement", GlobalId=ifcopenshell.guid.new(),
-        RelatingBuildingElement=mur, RelatedOpeningElement=ouverture,
-    )
+    percer(modele, mur, ouverture)
     modele.create_entity(
         "IfcRelFillsElement", GlobalId=ifcopenshell.guid.new(),
         RelatingOpeningElement=ouverture, RelatedBuildingElement=porte,
     )
 
 
-def verifier_dimensions(longueur, largeur, epaisseur):
-    """Vérifie que la porte et les baies tiennent dans le conteneur."""
+def verifier_dimensions(longueur, largeur, hauteur, epaisseur):
+    """Vérifie que la porte, les baies, les grilles et les ventilateurs tiennent dans le conteneur."""
     x_int = longueur / 2 - epaisseur    # demi-longueur intérieure
     y_int = largeur / 2 - epaisseur     # demi-largeur intérieure
     if NB_BAIES * BAIE_LARGEUR + JEU_FOND > 2 * x_int:
@@ -165,15 +183,21 @@ def verifier_dimensions(longueur, largeur, epaisseur):
         raise ValueError("Baies trop profondes : plus de place pour le couloir.")
     if BAIE_PROFONDEUR / 2 + PORTE_LARGEUR / 2 > y_int:
         raise ValueError("La porte dépasse du mur de bout.")
+    if NB_GRILLES * GRILLE_LARGEUR > 2 * x_int:
+        raise ValueError("Trop de grilles pour la longueur du long mur.")
+    if GRILLE_Z + GRILLE_HAUTEUR > hauteur - epaisseur:
+        raise ValueError("Les grilles dépassent de la hauteur du mur.")
+    if NB_VENTILATEURS * VENTILATEUR_COTE > 2 * x_int:
+        raise ValueError("Trop de ventilateurs pour la longueur du toit.")
 
 
 def creer_conteneur(modele, corps, niveau, nom, longueur, largeur, hauteur,
                     epaisseur, x=0.0, y=0.0, z=0.0):
     """
-    Crée un conteneur creux (coque + porte + baies) dont le centre de la face
+    Crée un conteneur creux (coque + porte + baies + ventilation) dont le centre de la face
     inférieure est en (x, y, z). Retourne l'assemblage.
     """
-    verifier_dimensions(longueur, largeur, epaisseur)
+    verifier_dimensions(longueur, largeur, hauteur, epaisseur)
 
     e = epaisseur
     x_int = longueur / 2 - e    # demi-longueur intérieure
@@ -225,6 +249,40 @@ def creer_conteneur(modele, corps, niveau, nom, longueur, largeur, hauteur,
     percer_et_remplir(modele, mur_bout_a, ouverture, porte)
     pieces.append(porte)
 
+    # --- Grilles de ventilation : entrée d'air dans le long mur A (côté couloir) ---
+    y_mur_a = (largeur - e) / 2
+    case_grille = 2 * x_int / NB_GRILLES        # largeur de la zone de chaque grille
+    for i in range(NB_GRILLES):
+        x_grille = -x_int + (i + 0.5) * case_grille
+        trou = creer_boite(
+            modele, corps, niveau, "IfcOpeningElement", f"{nom} - Ouverture grille {i + 1}",
+            GRILLE_LARGEUR, 2 * e, GRILLE_HAUTEUR,
+            x + x_grille, y + y_mur_a, z + GRILLE_Z, "OPENING", ranger=False,
+        )
+        grille = boite("IfcAirTerminal", f"Grille de ventilation {i + 1} (illustratif)",
+                       GRILLE_LARGEUR, GRILLE_EPAISSEUR, GRILLE_HAUTEUR,
+                       x_grille, y_mur_a, GRILLE_Z, "GRILLE")
+        grille.Description = NOTE_ILLUSTRATIF
+        percer_et_remplir(modele, mur_long_a, trou, grille)
+        pieces.append(grille)
+
+    # --- Ventilateurs d'extraction : sur le toit, au-dessus des baies ---
+    case_vent = 2 * x_int / NB_VENTILATEURS
+    for i in range(NB_VENTILATEURS):
+        x_vent = -x_int + (i + 0.5) * case_vent
+        # Trou dans le toit (traverse toute l'épaisseur de la dalle), sous le ventilateur
+        trou = creer_boite(
+            modele, corps, niveau, "IfcOpeningElement", f"{nom} - Ouverture ventilateur {i + 1}",
+            VENTILATEUR_OUVERTURE, VENTILATEUR_OUVERTURE, 2 * e,
+            x + x_vent, y + y_baie, z + hauteur - 1.5 * e, "OPENING", ranger=False,
+        )
+        percer(modele, toit, trou)
+        ventilateur = boite("IfcFan", f"Ventilateur d'extraction {i + 1} (illustratif)",
+                            VENTILATEUR_COTE, VENTILATEUR_COTE, VENTILATEUR_HAUTEUR,
+                            x_vent, y_baie, hauteur, "TUBEAXIAL")
+        ventilateur.Description = NOTE_ILLUSTRATIF
+        pieces.append(ventilateur)
+
     # Assemblage parent : le conteneur est UN objet logique composé de ses parties
     assemblage = ifcopenshell.api.root.create_entity(
         modele, ifc_class="IfcElementAssembly", name=nom
@@ -258,6 +316,8 @@ def main():
           f"portes : {len(modele.by_type('IfcDoor'))}, "
           f"ouvertures : {len(modele.by_type('IfcOpeningElement'))}, "
           f"baies : {len(modele.by_type('IfcBuildingElementProxy'))}, "
+          f"grilles : {len(modele.by_type('IfcAirTerminal'))}, "
+          f"ventilateurs : {len(modele.by_type('IfcFan'))}, "
           f"assemblages : {len(modele.by_type('IfcElementAssembly'))}")
 
 
