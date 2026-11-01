@@ -40,6 +40,8 @@ de puissance de calcul, puis d'automatiser par script ce qui se fait d'habitude 
 - Équipements du couloir, côté porte : une armoire électrique (`IfcElectricDistributionBoard`),
   un extincteur (`IfcFireSuppressionTerminal`, type `USERDEFINED` car IFC4 n'a pas de type
   extincteur) et 3 luminaires (`IfcLightFixture`) au plafond.
+- Un chemin de câbles (`IfcCableCarrierSegment`) sous le toit, au-dessus des baies et de
+  l'armoire : c'est par là que passerait l'alimentation des baies.
 - La fonction `creer_conteneur(...)` prend une position (x, y, z) : elle pourra être appelée
   plusieurs fois pour placer plusieurs unités.
 
@@ -88,6 +90,7 @@ compute-container-bim/
 ├── docs/
 │   ├── coupe-blender.png
 │   ├── plan-coupe.svg
+│   ├── plan-plafond.svg
 │   └── plan-site.svg
 ├── LICENSE
 ├── requirements.txt
@@ -115,7 +118,7 @@ python scripts/lire_ifc.py models/compute-container-20ft-v2.ifc
 
 # Générer le plan en coupe (SVG)
 python scripts/generer_plan.py
-python scripts/generer_plan.py --hauteur 1.2 --sortie docs/plan-1m20.svg
+python scripts/generer_plan.py --hauteur 2.22 --sortie docs/plan-plafond.svg   # coupe au niveau du chemin de câbles
 
 # Implanter 10 conteneurs sur un site (paramètres dans sites/exemple-10-unites.json)
 python scripts/implanter_site.py
@@ -149,7 +152,7 @@ réécrit le fichier IFC.
 
 - La coque est une représentation simplifiée : parois de 10 cm, une seule porte, pas de
   ventilation ni de climatisation.
-- L'agencement interne (baies, porte, ventilation, armoire, extincteur, luminaires) est
+- L'agencement interne (baies, porte, ventilation, armoire, extincteur, luminaires, chemin de câbles) est
   **illustratif** : cotes de racks standard 42U et d'équipements courants, non issues du
   fabricant, dont l'agencement n'est pas public.
 - Avec les ventilateurs, la hauteur hors tout dépasse le gabarit ISO (2,791 m contre 2,591 m) :
