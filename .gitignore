@@ -22,3 +22,10 @@ Thumbs.db
 sites/gabes-exemple.json
 models/site-gabes-exemple.ifc
 models/site-gabes-exemple.kml
+
+# Données OpenStreetMap téléchargées
+donnees/
+
+# Scripts d'exploration, gardés en local
+scripts/explorer_osm.py
+scripts/explorer_relief.py

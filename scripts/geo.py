@@ -117,6 +117,16 @@ def kml_point(nom, description, longitude, latitude, style):
             f"</Placemark>")
 
 
+def kml_ligne(nom, description, points, style):
+    """Une ligne KML (route, piste). 'points' = liste de (longitude, latitude)."""
+    coordonnees = " ".join(f"{lon:.8f},{lat:.8f},0" for lon, lat in points)
+    return (f"<Placemark><name>{escape(nom)}</name>"
+            f"<description>{escape(description)}</description>"
+            f"<styleUrl>#{style}</styleUrl>"
+            f"<LineString><tessellate>1</tessellate>"
+            f"<coordinates>{coordonnees}</coordinates></LineString></Placemark>")
+
+
 # Styles KML. Les couleurs sont au format aabbggrr (alpha, bleu, vert, rouge).
 STYLES_KML = (
     '<Style id="conteneur"><LineStyle><color>ff202124</color><width>1.5</width></LineStyle>'
@@ -124,6 +134,14 @@ STYLES_KML = (
     '<Style id="emprise"><LineStyle><color>ff3da3e8</color><width>1.5</width></LineStyle>'
     '<PolyStyle><fill>0</fill></PolyStyle></Style>'
     '<Style id="repere"><IconStyle><scale>1.1</scale></IconStyle></Style>'
+    '<Style id="pente0"><LineStyle><width>0</width></LineStyle><PolyStyle><color>aa327d2e</color></PolyStyle></Style>'
+    '<Style id="pente1"><LineStyle><width>0</width></LineStyle><PolyStyle><color>aa1ac1e8</color></PolyStyle></Style>'
+    '<Style id="pente2"><LineStyle><width>0</width></LineStyle><PolyStyle><color>aa1a82e8</color></PolyStyle></Style>'
+    '<Style id="pente3"><LineStyle><width>0</width></LineStyle><PolyStyle><color>aa3c3cd9</color></PolyStyle></Style>'
+    '<Style id="route"><LineStyle><color>ff3c3cd9</color><width>3</width></LineStyle></Style>'
+    '<Style id="piste"><LineStyle><color>ff00d7ff</color><width>2</width></LineStyle></Style>'
+    '<Style id="batiment"><LineStyle><color>ffffffff</color><width>1</width></LineStyle>'
+    '<PolyStyle><color>aa3c3cd9</color></PolyStyle></Style>'
 )
 
 
