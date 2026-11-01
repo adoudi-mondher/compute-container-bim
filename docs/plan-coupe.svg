@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1029" height="546" viewBox="0 0 1029 546" font-family="sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="60" y="30" font-size="16" fill="#202124">Coupe horizontale à Z = 1.50 m</text>
+<polygon points="262.5,410.7 352.5,410.7 352.5,250.2 262.5,250.2 262.5,410.7" fill="#3c4043" stroke="#202124" stroke-width="1.5"/>
+<text x="307.5" y="330.4" font-size="13" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">B3</text>
+<polygon points="352.5,410.7 442.5,410.7 442.5,250.2 352.5,250.2 352.5,410.7" fill="#3c4043" stroke="#202124" stroke-width="1.5"/>
+<text x="397.5" y="330.4" font-size="13" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">B4</text>
+<polygon points="532.5,410.7 622.5,410.7 622.5,250.2 532.5,250.2 532.5,410.7" fill="#3c4043" stroke="#202124" stroke-width="1.5"/>
+<text x="577.5" y="330.4" font-size="13" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">B6</text>
+<polygon points="622.5,410.7 712.5,410.7 712.5,250.2 622.5,250.2 622.5,410.7" fill="#3c4043" stroke="#202124" stroke-width="1.5"/>
+<text x="667.5" y="330.4" font-size="13" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">B7</text>
+<polygon points="712.5,410.7 802.5,410.7 802.5,250.2 712.5,250.2 712.5,410.7" fill="#3c4043" stroke="#202124" stroke-width="1.5"/>
+<text x="757.5" y="330.4" font-size="13" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">B8</text>
+<polygon points="442.5,410.7 532.5,410.7 532.5,250.2 442.5,250.2 442.5,410.7" fill="#3c4043" stroke="#202124" stroke-width="1.5"/>
+<text x="487.5" y="330.4" font-size="13" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">B5</text>
+<polygon points="172.5,410.7 262.5,410.7 262.5,250.2 172.5,250.2 172.5,410.7" fill="#3c4043" stroke="#202124" stroke-width="1.5"/>
+<text x="217.5" y="330.4" font-size="13" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">B2</text>
+<polygon points="82.5,410.7 172.5,410.7 172.5,250.2 82.5,250.2 82.5,410.7" fill="#3c4043" stroke="#202124" stroke-width="1.5"/>
+<text x="127.5" y="330.4" font-size="13" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">B1</text>
+<polygon points="60.0,75.0 968.7,75.0 968.7,60.0 60.0,60.0 60.0,75.0" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
+<polygon points="60.0,425.7 968.7,425.7 968.7,410.7 60.0,410.7 60.0,425.7" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
+<polygon points="60.0,410.7 75.0,410.7 75.0,75.0 60.0,75.0 60.0,410.7" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
+<polygon points="968.7,410.7 953.7,410.7 953.7,237.6 968.7,237.6 968.7,410.7" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
+<polygon points="953.7,75.0 968.7,75.0 968.7,87.6 953.7,87.6 953.7,75.0" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
+<polygon points="957.5,237.6 964.9,237.6 964.9,87.6 957.5,87.6 957.5,237.6" fill="#e8a33d" stroke="#202124" stroke-width="1.5"/>
+<text x="949.2" y="162.6" font-size="13" fill="#202124" text-anchor="end" dominant-baseline="middle">Porte</text>
+<line x1="60" y1="517.7" x2="210" y2="517.7" stroke="#202124" stroke-width="3"/>
+<text x="220" y="521.7" font-size="12" fill="#202124">1 m</text>
+<text x="968.6999999999998" y="521.7" font-size="12" fill="#202124" text-anchor="end">Hors tout : 6.058 x 2.438 m</text>
+</svg>
