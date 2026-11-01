@@ -36,6 +36,7 @@ STYLES = {
     "IfcWall": ("#9aa0a6", "#202124"),
     "IfcBuildingElementProxy": ("#3c4043", "#202124"),
     "IfcDoor": ("#e8a33d", "#202124"),
+    "IfcAirTerminal": ("#4fa3b8", "#202124"),
 }
 STYLE_PAR_DEFAUT = ("#bdc1c6", "#202124")
 
