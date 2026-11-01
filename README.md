@@ -6,7 +6,7 @@ Maquette BIM d'un conteneur de calcul (20 ft), générée et enrichie par script
 > Les données d'exemple proviennent des spécifications publiques du modèle Policloud 100
 > (policloud.com, consulté le 27/10/2026).
 
-![Conteneur généré par script, coupé pour montrer les baies, dans Blender avec Bonsai](docs/coupe-blender.png)
+![Conteneur généré par script, toit masqué : baies, armoire, extincteur, luminaires, grilles et ventilateurs, dans Blender avec Bonsai](docs/coupe-blender.png)
 
 ## Pourquoi ce projet
 
