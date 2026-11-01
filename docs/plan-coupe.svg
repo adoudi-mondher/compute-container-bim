@@ -18,6 +18,8 @@
 <polygon points="82.5,410.7 172.5,410.7 172.5,250.2 82.5,250.2 82.5,410.7" fill="#3c4043" stroke="#202124" stroke-width="1.5"/>
 <text x="127.5" y="330.4" font-size="13" fill="#ffffff" text-anchor="middle" dominant-baseline="middle">B1</text>
 <polygon points="60.0,425.7 968.7,425.7 968.7,410.7 60.0,410.7 60.0,425.7" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
+<polygon points="893.7,384.1 953.7,384.1 953.7,264.2 893.7,264.2 893.7,384.1" fill="#b39ddb" stroke="#202124" stroke-width="1.5"/>
+<text x="923.7" y="324.2" font-size="13" fill="#202124" text-anchor="middle" dominant-baseline="middle">Armoire</text>
 <polygon points="124.8,75.0 60.0,75.0 60.0,60.0 124.8,60.0 124.8,75.0" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
 <polygon points="684.2,60.0 783.9,60.0 783.9,75.0 684.2,75.0 684.2,60.0" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
 <polygon points="968.7,60.0 968.7,75.0 903.9,75.0 903.9,60.0 968.7,60.0" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
@@ -32,6 +34,7 @@
 <polygon points="564.2,71.2 684.2,71.2 684.2,63.8 564.2,63.8 564.2,71.2" fill="#4fa3b8" stroke="#202124" stroke-width="1.5"/>
 <polygon points="124.8,71.2 244.8,71.2 244.8,63.8 124.8,63.8 124.8,71.2" fill="#4fa3b8" stroke="#202124" stroke-width="1.5"/>
 <polygon points="783.9,71.2 903.9,71.2 903.9,63.8 783.9,63.8 783.9,71.2" fill="#4fa3b8" stroke="#202124" stroke-width="1.5"/>
+<polygon points="859.9,410.7 882.4,410.7 882.4,388.2 859.9,388.2 859.9,410.7" fill="#d93025" stroke="#202124" stroke-width="1.5"/>
 <line x1="60" y1="517.7" x2="210" y2="517.7" stroke="#202124" stroke-width="3"/>
 <text x="220" y="521.7" font-size="12" fill="#202124">1 m</text>
 <text x="968.6999999999998" y="521.7" font-size="12" fill="#202124" text-anchor="end">Hors tout : 6.058 x 2.438 m</text>
