@@ -45,6 +45,18 @@ de puissance de calcul, puis d'automatiser par script ce qui se fait d'habitude 
 
 ![Plan en coupe horizontale à 1,50 m](docs/plan-coupe.svg)
 
+**Implantation d'un site**
+- `scripts/implanter_site.py` : place N conteneurs en grille sur un site, à partir d'un fichier
+  de paramètres JSON (dossier `sites/`) : nombre d'unités, colonnes, pas de la grille, emprise
+  par unité, puissance disponible.
+- Calcule les totaux du site : puissance, GPU, vCPU, stockage, emprise. Ils sont aussi écrits
+  dans l'IFC, sur le site (jeu de propriétés `SiteCalcul`).
+- Contrôles automatiques : alerte si la puissance demandée dépasse la puissance disponible, ou
+  si la grille est plus serrée que l'emprise annoncée par le fabricant.
+- Exemple : `sites/exemple-10-unites.json` (10 unités, soit 1 MW).
+
+![Plan en coupe d'un site de 10 conteneurs](docs/plan-site.svg)
+
 **Outil de contrôle**
 - `scripts/lire_ifc.py` : lit un fichier IFC et affiche pour chaque élément son nom, sa classe
   IFC, sa position et ses dimensions.
@@ -57,14 +69,20 @@ compute-container-bim/
 │   ├── lire_ifc.py
 │   ├── ajouter_proprietes.py
 │   ├── creer_conteneur.py
-│   └── generer_plan.py
+│   ├── generer_plan.py
+│   ├── implanter_site.py
+│   └── geo.py
+├── sites/
+│   └── exemple-10-unites.json
 ├── models/
 │   ├── policloud-container-20ft.ifc          v1 : bloc, fait à la main
 │   ├── policloud-container-20ft-enrichi.ifc  v1 avec propriétés
-│   └── compute-container-20ft-v2.ifc         v2 : coque creuse, générée par script
+│   ├── compute-container-20ft-v2.ifc         v2 : coque creuse, générée par script
+│   └── site-exemple-10-unites.ifc            site de 10 conteneurs
 ├── docs/
 │   ├── coupe-blender.png
-│   └── plan-coupe.svg
+│   ├── plan-coupe.svg
+│   └── plan-site.svg
 ├── LICENSE
 ├── requirements.txt
 └── README.md
@@ -92,6 +110,12 @@ python scripts/lire_ifc.py models/compute-container-20ft-v2.ifc
 # Générer le plan en coupe (SVG)
 python scripts/generer_plan.py
 python scripts/generer_plan.py --hauteur 1.2 --sortie docs/plan-1m20.svg
+
+# Implanter 10 conteneurs sur un site (paramètres dans sites/exemple-10-unites.json)
+python scripts/implanter_site.py
+
+# Plan du site (échelle réduite, car le site fait environ 46 m de large)
+python scripts/generer_plan.py models/site-exemple-10-unites.ifc --echelle 20 --sortie docs/plan-site.svg
 
 # Ajouter les propriétés de calcul à la version 1
 python scripts/ajouter_proprietes.py
@@ -122,13 +146,14 @@ réécrit le fichier IFC.
 - L'agencement interne (baies, porte) est **illustratif** : cotes de racks standard 42U, non
   issues du fabricant, dont l'agencement n'est pas public.
 - `generer_plan.py` ne lit pas les maillages faits à la main (version 1).
+- Le calcul de puissance est linéaire (N x puissance d'une unité) : il ne tient compte ni des
+  pertes, ni du refroidissement, ni du réseau, et n'applique aucune marge de sécurité.
 - Les scripts ont été testés uniquement sur ces modèles.
 - Les valeurs sont celles annoncées par le fabricant, non vérifiées de façon indépendante.
 
 ## Pistes suivantes
 
-- Implantation de N unités sur un terrain (50 m² par unité) avec calcul automatique de la
-  puissance totale, du nombre de GPU et de l'emprise du site.
+- Marge de sécurité configurable sur la puissance disponible.
 - Contrôles automatiques (propriétés obligatoires, cohérence des dimensions).
 
 ## Outils
