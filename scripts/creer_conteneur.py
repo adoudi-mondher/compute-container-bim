@@ -1,9 +1,15 @@
 """
 creer_conteneur.py - Génère un conteneur de calcul 20 ft en coque creuse, en IFC4.
 
-Le conteneur est un assemblage (IfcElementAssembly) de 6 pièces :
-  sol, toit, 2 longs murs, 2 murs de bout.
+Le conteneur est un assemblage (IfcElementAssembly) composé de :
+  - 6 pièces de coque : sol, toit, 2 longs murs, 2 murs de bout
+  - 1 porte de service percée dans le mur de bout A
+  - 8 baies informatiques en une rangée contre le long mur B
 Les propriétés de calcul (puissance, GPU, ...) sont portées par l'assemblage.
+
+ATTENTION : la porte et les baies sont ILLUSTRATIVES. Leurs cotes sont des
+hypothèses crédibles (baie 19" type 42U de 600 x 1070 mm), pas des données
+fabricant. L'agencement interne réel du Policloud n'est pas public.
 
 Usage (depuis la racine du projet, venv activé) :
     python scripts/creer_conteneur.py
@@ -11,6 +17,7 @@ Usage (depuis la racine du projet, venv activé) :
 
 import numpy as np                      # matrices 4x4 pour placer les éléments
 import ifcopenshell
+import ifcopenshell.guid                # identifiants uniques (GlobalId) des relations
 import ifcopenshell.api.root            # création d'entités (IfcWall, IfcSlab, ...)
 import ifcopenshell.api.project         # création du fichier et du projet
 import ifcopenshell.api.unit            # unités (mètres)
@@ -27,6 +34,20 @@ LONGUEUR = 6.058
 LARGEUR = 2.438
 HAUTEUR = 2.591
 EPAISSEUR = 0.10    # épaisseur des parois (simplifiée)
+
+# Porte de service sur le mur de bout A (cotes illustratives)
+PORTE_LARGEUR = 1.0
+PORTE_HAUTEUR = 2.0
+PORTE_EPAISSEUR = 0.05
+
+# Baies informatiques (cotes illustratives : baie 19" type 42U)
+NB_BAIES = 8
+BAIE_LARGEUR = 0.6      # le long du conteneur (axe X)
+BAIE_PROFONDEUR = 1.07  # en travers du conteneur (axe Y)
+BAIE_HAUTEUR = 2.0
+JEU_FOND = 0.05         # jeu entre la première baie et le mur de fond
+
+NOTE_ILLUSTRATIF = "Cotes illustratives, non issues du fabricant."
 
 # Caractéristiques du Policloud 100 (spécifications publiques du fabricant)
 PROPRIETES = {
@@ -81,10 +102,11 @@ def creer_structure(modele):
 
 
 def creer_boite(modele, corps, niveau, classe_ifc, nom, dx, dy, dz, x, y, z,
-                type_predefini=None):
+                type_predefini=None, ranger=True):
     """
     Crée une boîte (dx, dy, dz) comme élément IFC.
     (x, y, z) = centre de la face inférieure de la boîte.
+    ranger=False : l'élément n'est pas rattaché au niveau (cas d'une ouverture).
     Retourne l'élément créé.
     """
     element = ifcopenshell.api.root.create_entity(
@@ -110,41 +132,100 @@ def creer_boite(modele, corps, niveau, classe_ifc, nom, dx, dy, dz, x, y, z,
     )
 
     # Rattachement au niveau
-    ifcopenshell.api.spatial.assign_container(
-        modele, products=[element], relating_structure=niveau
-    )
+    if ranger:
+        ifcopenshell.api.spatial.assign_container(
+            modele, products=[element], relating_structure=niveau
+        )
     return element
+
+
+def percer_et_remplir(modele, mur, ouverture, porte):
+    """
+    Relie une ouverture à un mur (le mur est percé) et une porte à l'ouverture
+    (la porte remplit le trou). On crée les deux relations IFC directement :
+    IfcRelVoidsElement (mur -> ouverture) et IfcRelFillsElement (ouverture -> porte).
+    """
+    modele.create_entity(
+        "IfcRelVoidsElement", GlobalId=ifcopenshell.guid.new(),
+        RelatingBuildingElement=mur, RelatedOpeningElement=ouverture,
+    )
+    modele.create_entity(
+        "IfcRelFillsElement", GlobalId=ifcopenshell.guid.new(),
+        RelatingOpeningElement=ouverture, RelatedBuildingElement=porte,
+    )
+
+
+def verifier_dimensions(longueur, largeur, epaisseur):
+    """Vérifie que la porte et les baies tiennent dans le conteneur."""
+    x_int = longueur / 2 - epaisseur    # demi-longueur intérieure
+    y_int = largeur / 2 - epaisseur     # demi-largeur intérieure
+    if NB_BAIES * BAIE_LARGEUR + JEU_FOND > 2 * x_int:
+        raise ValueError("Trop de baies pour la longueur intérieure du conteneur.")
+    if BAIE_PROFONDEUR >= 2 * y_int:
+        raise ValueError("Baies trop profondes : plus de place pour le couloir.")
+    if BAIE_PROFONDEUR / 2 + PORTE_LARGEUR / 2 > y_int:
+        raise ValueError("La porte dépasse du mur de bout.")
 
 
 def creer_conteneur(modele, corps, niveau, nom, longueur, largeur, hauteur,
                     epaisseur, x=0.0, y=0.0, z=0.0):
     """
-    Crée un conteneur creux (assemblage de 6 pièces) dont le centre de la face
+    Crée un conteneur creux (coque + porte + baies) dont le centre de la face
     inférieure est en (x, y, z). Retourne l'assemblage.
     """
+    verifier_dimensions(longueur, largeur, epaisseur)
+
     e = epaisseur
+    x_int = longueur / 2 - e    # demi-longueur intérieure
+    y_int = largeur / 2 - e     # demi-largeur intérieure
+
     boite = lambda classe, n, dx, dy, dz, px, py, pz, t=None: creer_boite(
         modele, corps, niveau, classe, f"{nom} - {n}",
         dx, dy, dz, x + px, y + py, z + pz, t,
     )
 
-    pieces = [
-        # Sol et toit : pleine surface, épaisseur e
-        boite("IfcSlab", "Sol", longueur, largeur, e, 0, 0, 0, "FLOOR"),
-        boite("IfcSlab", "Toit", longueur, largeur, e, 0, 0, hauteur - e, "ROOF"),
-        # Deux longs murs (côtés), entre le sol et le toit
-        boite("IfcWall", "Mur long A", longueur, e, hauteur - 2 * e,
-              0, (largeur - e) / 2, e),
-        boite("IfcWall", "Mur long B", longueur, e, hauteur - 2 * e,
-              0, -(largeur - e) / 2, e),
-        # Deux murs de bout, plus étroits pour s'insérer entre les longs murs
-        boite("IfcWall", "Mur de bout A", e, largeur - 2 * e, hauteur - 2 * e,
-              (longueur - e) / 2, 0, e),
-        boite("IfcWall", "Mur de bout B", e, largeur - 2 * e, hauteur - 2 * e,
-              -(longueur - e) / 2, 0, e),
-    ]
+    # --- Coque : 6 pièces ---
+    sol = boite("IfcSlab", "Sol", longueur, largeur, e, 0, 0, 0, "FLOOR")
+    toit = boite("IfcSlab", "Toit", longueur, largeur, e, 0, 0, hauteur - e, "ROOF")
+    mur_long_a = boite("IfcWall", "Mur long A", longueur, e, hauteur - 2 * e,
+                       0, (largeur - e) / 2, e)
+    mur_long_b = boite("IfcWall", "Mur long B", longueur, e, hauteur - 2 * e,
+                       0, -(largeur - e) / 2, e)
+    # Murs de bout plus étroits pour s'insérer entre les longs murs
+    x_bout = (longueur - e) / 2
+    mur_bout_a = boite("IfcWall", "Mur de bout A", e, largeur - 2 * e, hauteur - 2 * e,
+                       x_bout, 0, e)
+    mur_bout_b = boite("IfcWall", "Mur de bout B", e, largeur - 2 * e, hauteur - 2 * e,
+                       -x_bout, 0, e)
+    pieces = [sol, toit, mur_long_a, mur_long_b, mur_bout_a, mur_bout_b]
 
-    # Assemblage parent : le conteneur est UN objet logique composé de 6 parties
+    # --- Baies : une rangée contre le long mur B, à partir du fond (X négatif) ---
+    y_baie = -y_int + BAIE_PROFONDEUR / 2
+    for i in range(NB_BAIES):
+        x_baie = -x_int + JEU_FOND + BAIE_LARGEUR / 2 + i * BAIE_LARGEUR
+        baie = boite("IfcBuildingElementProxy", f"Baie {i + 1} (illustratif)",
+                     BAIE_LARGEUR, BAIE_PROFONDEUR, BAIE_HAUTEUR, x_baie, y_baie, e)
+        baie.Description = NOTE_ILLUSTRATIF
+        pieces.append(baie)
+
+    # --- Porte de service : au milieu du couloir, dans le mur de bout A ---
+    y_porte = BAIE_PROFONDEUR / 2   # le couloir va de -y_int + profondeur à +y_int
+    # L'ouverture est plus épaisse que le mur pour que le trou traverse complètement
+    ouverture = creer_boite(
+        modele, corps, niveau, "IfcOpeningElement", f"{nom} - Ouverture porte",
+        2 * e, PORTE_LARGEUR, PORTE_HAUTEUR,
+        x + x_bout, y + y_porte, z + e, "OPENING", ranger=False,
+    )
+    porte = boite("IfcDoor", "Porte de service (illustratif)",
+                  PORTE_EPAISSEUR, PORTE_LARGEUR, PORTE_HAUTEUR,
+                  x_bout, y_porte, e, "DOOR")
+    porte.OverallWidth = PORTE_LARGEUR
+    porte.OverallHeight = PORTE_HAUTEUR
+    porte.Description = NOTE_ILLUSTRATIF
+    percer_et_remplir(modele, mur_bout_a, ouverture, porte)
+    pieces.append(porte)
+
+    # Assemblage parent : le conteneur est UN objet logique composé de ses parties
     assemblage = ifcopenshell.api.root.create_entity(
         modele, ifc_class="IfcElementAssembly", name=nom
     )
@@ -174,6 +255,9 @@ def main():
     print(f"Fichier créé : {FICHIER_SORTIE}")
     print(f"Murs : {len(modele.by_type('IfcWall'))}, "
           f"dalles : {len(modele.by_type('IfcSlab'))}, "
+          f"portes : {len(modele.by_type('IfcDoor'))}, "
+          f"ouvertures : {len(modele.by_type('IfcOpeningElement'))}, "
+          f"baies : {len(modele.by_type('IfcBuildingElementProxy'))}, "
           f"assemblages : {len(modele.by_type('IfcElementAssembly'))}")
 
 
