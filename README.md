@@ -6,7 +6,7 @@ Maquette BIM d'un conteneur de calcul (20 ft), générée et enrichie par script
 > Les données d'exemple proviennent des spécifications publiques du modèle Policloud 100
 > (policloud.com, consulté le 27/10/2026).
 
-![Conteneur en coque creuse généré par script, ouvert dans Blender avec Bonsai](docs/coque-blender.png)
+![Conteneur généré par script, coupé pour montrer les baies, dans Blender avec Bonsai](docs/coupe-blender.png)
 
 ## Pourquoi ce projet
 
@@ -31,8 +31,19 @@ de puissance de calcul, puis d'automatiser par script ce qui se fait d'habitude 
   projet / site / bâtiment / niveau, puis un conteneur composé de 6 pièces (sol, toit,
   2 longs murs, 2 murs de bout, parois de 10 cm), regroupées sous un `IfcElementAssembly`.
   Les propriétés de calcul sont portées par l'assemblage.
+- Une porte de service (1,0 x 2,0 m) dans un mur de bout : le mur est percé
+  (`IfcOpeningElement` + `IfcRelVoidsElement`) puis rempli par la porte (`IfcRelFillsElement`).
+- 8 baies informatiques illustratives (0,6 x 1,07 x 2,0 m, format 42U) alignées contre un long mur.
 - La fonction `creer_conteneur(...)` prend une position (x, y, z) : elle pourra être appelée
   plusieurs fois pour placer plusieurs unités.
+
+**Plan en coupe**
+- `scripts/generer_plan.py` : coupe le modèle IFC à une hauteur donnée (1,50 m par défaut) et
+  dessine le plan vu de dessus en SVG : murs, baies B1 à B8, porte, échelle graphique et
+  dimensions hors tout. Il ne lit que les éléments extrudés depuis un rectangle, ce qui est le
+  cas de tout ce que produit `creer_conteneur.py`.
+
+![Plan en coupe horizontale à 1,50 m](docs/plan-coupe.svg)
 
 **Outil de contrôle**
 - `scripts/lire_ifc.py` : lit un fichier IFC et affiche pour chaque élément son nom, sa classe
@@ -45,13 +56,15 @@ compute-container-bim/
 ├── scripts/
 │   ├── lire_ifc.py
 │   ├── ajouter_proprietes.py
-│   └── creer_conteneur.py
+│   ├── creer_conteneur.py
+│   └── generer_plan.py
 ├── models/
 │   ├── policloud-container-20ft.ifc          v1 : bloc, fait à la main
 │   ├── policloud-container-20ft-enrichi.ifc  v1 avec propriétés
 │   └── compute-container-20ft-v2.ifc         v2 : coque creuse, générée par script
 ├── docs/
-│   └── coque-blender.png
+│   ├── coupe-blender.png
+│   └── plan-coupe.svg
 ├── LICENSE
 ├── requirements.txt
 └── README.md
@@ -76,11 +89,17 @@ python scripts/creer_conteneur.py
 # Contrôler le résultat
 python scripts/lire_ifc.py models/compute-container-20ft-v2.ifc
 
+# Générer le plan en coupe (SVG)
+python scripts/generer_plan.py
+python scripts/generer_plan.py --hauteur 1.2 --sortie docs/plan-1m20.svg
+
 # Ajouter les propriétés de calcul à la version 1
 python scripts/ajouter_proprietes.py
 ```
 
 Les fichiers `.ifc` s'ouvrent dans Blender avec l'extension Bonsai (*Open IFC Project*).
+Pour modifier le modèle, relancer le script plutôt qu'enregistrer depuis Blender : Bonsai
+réécrit le fichier IFC.
 
 ## Propriétés ajoutées (jeu `Policloud`)
 
@@ -98,14 +117,16 @@ Les fichiers `.ifc` s'ouvrent dans Blender avec l'extension Bonsai (*Open IFC Pr
 
 ## Limites connues
 
-- La coque est une représentation simplifiée : parois de 10 cm, sans portes ni ouvertures,
-  sans agencement interne (il n'est pas public).
+- La coque est une représentation simplifiée : parois de 10 cm, une seule porte, pas de
+  ventilation ni de climatisation.
+- L'agencement interne (baies, porte) est **illustratif** : cotes de racks standard 42U, non
+  issues du fabricant, dont l'agencement n'est pas public.
+- `generer_plan.py` ne lit pas les maillages faits à la main (version 1).
 - Les scripts ont été testés uniquement sur ces modèles.
 - Les valeurs sont celles annoncées par le fabricant, non vérifiées de façon indépendante.
 
 ## Pistes suivantes
 
-- Portes et ouvertures sur un mur de bout (cotes illustratives).
 - Implantation de N unités sur un terrain (50 m² par unité) avec calcul automatique de la
   puissance totale, du nombre de GPU et de l'emprise du site.
 - Contrôles automatiques (propriétés obligatoires, cohérence des dimensions).
