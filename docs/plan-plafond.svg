@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1029" height="546" viewBox="0 0 1029 546" font-family="sans-serif">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="60" y="30" font-size="16" fill="#202124">Coupe horizontale à Z = 2.22 m</text>
+<polygon points="82.5,352.9 938.7,352.9 938.7,308.0 82.5,308.0 82.5,352.9" fill="#c9a227" stroke="#202124" stroke-width="1.5"/>
+<polygon points="60.0,75.0 968.7,75.0 968.7,60.0 60.0,60.0 60.0,75.0" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
+<polygon points="60.0,425.7 968.7,425.7 968.7,410.7 60.0,410.7 60.0,425.7" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
+<polygon points="953.7,410.7 968.7,410.7 968.7,75.0 953.7,75.0 953.7,410.7" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
+<polygon points="60.0,410.7 75.0,410.7 75.0,75.0 60.0,75.0 60.0,410.7" fill="#9aa0a6" stroke="#202124" stroke-width="1.5"/>
+<line x1="60" y1="517.7" x2="210" y2="517.7" stroke="#202124" stroke-width="3"/>
+<text x="220" y="521.7" font-size="12" fill="#202124">1 m</text>
+<text x="968.6999999999998" y="521.7" font-size="12" fill="#202124" text-anchor="end">Hors tout : 6.058 x 2.438 m</text>
+</svg>
