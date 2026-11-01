@@ -60,6 +60,23 @@ VENTILATEUR_COTE = 0.7   # carré de 0,7 m de côté
 VENTILATEUR_HAUTEUR = 0.2
 VENTILATEUR_OUVERTURE = 0.5   # trou dans le toit, sous le ventilateur
 
+# Armoire électrique contre le mur de bout A, à côté de la porte (cotes illustratives)
+ARMOIRE_PROFONDEUR = 0.4   # le long du conteneur (axe X)
+ARMOIRE_LARGEUR = 0.8      # en travers du conteneur (axe Y)
+ARMOIRE_HAUTEUR = 2.0
+
+# Extincteur fixé au long mur B, entre la dernière baie et le mur de bout (cotes illustratives)
+EXTINCTEUR_COTE = 0.15
+EXTINCTEUR_HAUTEUR = 0.55
+EXTINCTEUR_Z = 1.0         # hauteur du bas de l'extincteur, depuis le dessous du conteneur
+EXTINCTEUR_RETRAIT = 0.55  # distance entre le mur de bout et le centre de l'extincteur
+
+# Luminaires au plafond, le long du couloir (cotes illustratives)
+NB_LUMINAIRES = 3
+LUMINAIRE_LONGUEUR = 1.2
+LUMINAIRE_LARGEUR = 0.1
+LUMINAIRE_HAUTEUR = 0.06
+
 NOTE_ILLUSTRATIF = "Cotes illustratives, non issues du fabricant."
 
 # Caractéristiques du Policloud 100 (spécifications publiques du fabricant)
@@ -189,12 +206,23 @@ def verifier_dimensions(longueur, largeur, hauteur, epaisseur):
         raise ValueError("Les grilles dépassent de la hauteur du mur.")
     if NB_VENTILATEURS * VENTILATEUR_COTE > 2 * x_int:
         raise ValueError("Trop de ventilateurs pour la longueur du toit.")
+    # Fin de la dernière baie : l'armoire et l'extincteur doivent se trouver après
+    fin_baies = -x_int + JEU_FOND + NB_BAIES * BAIE_LARGEUR
+    if x_int - ARMOIRE_PROFONDEUR < fin_baies:
+        raise ValueError("L'armoire électrique gêne les baies.")
+    bas_porte = BAIE_PROFONDEUR / 2 - PORTE_LARGEUR / 2
+    if ARMOIRE_LARGEUR > bas_porte + y_int:
+        raise ValueError("L'armoire ne tient pas entre le mur et la porte.")
+    if x_int - EXTINCTEUR_RETRAIT - EXTINCTEUR_COTE / 2 < fin_baies:
+        raise ValueError("L'extincteur gêne les baies.")
+    if NB_LUMINAIRES * LUMINAIRE_LONGUEUR > 2 * x_int:
+        raise ValueError("Trop de luminaires pour la longueur du plafond.")
 
 
 def creer_conteneur(modele, corps, niveau, nom, longueur, largeur, hauteur,
                     epaisseur, x=0.0, y=0.0, z=0.0):
     """
-    Crée un conteneur creux (coque + porte + baies + ventilation) dont le centre de la face
+    Crée un conteneur creux (coque + porte + baies + ventilation + équipements) dont le centre de la face
     inférieure est en (x, y, z). Retourne l'assemblage.
     """
     verifier_dimensions(longueur, largeur, hauteur, epaisseur)
@@ -283,6 +311,35 @@ def creer_conteneur(modele, corps, niveau, nom, longueur, largeur, hauteur,
         ventilateur.Description = NOTE_ILLUSTRATIF
         pieces.append(ventilateur)
 
+    # --- Armoire électrique : contre le mur de bout A, entre le long mur B et la porte ---
+    bas_porte = y_porte - PORTE_LARGEUR / 2
+    armoire = boite("IfcElectricDistributionBoard", "Armoire électrique (illustratif)",
+                    ARMOIRE_PROFONDEUR, ARMOIRE_LARGEUR, ARMOIRE_HAUTEUR,
+                    x_int - ARMOIRE_PROFONDEUR / 2, (-y_int + bas_porte) / 2, e,
+                    "DISTRIBUTIONBOARD")
+    armoire.Description = NOTE_ILLUSTRATIF
+    pieces.append(armoire)
+
+    # --- Extincteur : fixé au long mur B, entre la dernière baie et le mur de bout ---
+    # IFC4 n'a pas de type "extincteur" : on utilise USERDEFINED avec un type texte.
+    extincteur = boite("IfcFireSuppressionTerminal", "Extincteur (illustratif)",
+                       EXTINCTEUR_COTE, EXTINCTEUR_COTE, EXTINCTEUR_HAUTEUR,
+                       x_int - EXTINCTEUR_RETRAIT, -y_int + EXTINCTEUR_COTE / 2, EXTINCTEUR_Z,
+                       "USERDEFINED")
+    extincteur.ObjectType = "Extincteur"
+    extincteur.Description = NOTE_ILLUSTRATIF
+    pieces.append(extincteur)
+
+    # --- Luminaires : sous le toit, au milieu du couloir (même Y que la porte) ---
+    case_lum = 2 * x_int / NB_LUMINAIRES
+    for i in range(NB_LUMINAIRES):
+        luminaire = boite("IfcLightFixture", f"Luminaire {i + 1} (illustratif)",
+                          LUMINAIRE_LONGUEUR, LUMINAIRE_LARGEUR, LUMINAIRE_HAUTEUR,
+                          -x_int + (i + 0.5) * case_lum, y_porte,
+                          hauteur - e - LUMINAIRE_HAUTEUR, "DIRECTIONSOURCE")
+        luminaire.Description = NOTE_ILLUSTRATIF
+        pieces.append(luminaire)
+
     # Assemblage parent : le conteneur est UN objet logique composé de ses parties
     assemblage = ifcopenshell.api.root.create_entity(
         modele, ifc_class="IfcElementAssembly", name=nom
@@ -318,6 +375,9 @@ def main():
           f"baies : {len(modele.by_type('IfcBuildingElementProxy'))}, "
           f"grilles : {len(modele.by_type('IfcAirTerminal'))}, "
           f"ventilateurs : {len(modele.by_type('IfcFan'))}, "
+          f"armoires : {len(modele.by_type('IfcElectricDistributionBoard'))}, "
+          f"extincteurs : {len(modele.by_type('IfcFireSuppressionTerminal'))}, "
+          f"luminaires : {len(modele.by_type('IfcLightFixture'))}, "
           f"assemblages : {len(modele.by_type('IfcElementAssembly'))}")
 
 

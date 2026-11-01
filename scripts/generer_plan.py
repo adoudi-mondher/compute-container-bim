@@ -37,6 +37,8 @@ STYLES = {
     "IfcBuildingElementProxy": ("#3c4043", "#202124"),
     "IfcDoor": ("#e8a33d", "#202124"),
     "IfcAirTerminal": ("#4fa3b8", "#202124"),
+    "IfcElectricDistributionBoard": ("#b39ddb", "#202124"),
+    "IfcFireSuppressionTerminal": ("#d93025", "#202124"),
 }
 STYLE_PAR_DEFAUT = ("#bdc1c6", "#202124")
 
@@ -114,6 +116,8 @@ def etiquette(element):
         return f"B{correspondance.group(1)}"
     if element.is_a("IfcDoor"):
         return "Porte"
+    if element.is_a("IfcElectricDistributionBoard"):
+        return "Armoire"
     return ""
 
 
