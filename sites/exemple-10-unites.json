@@ -1,0 +1,11 @@
+{
+  "nom": "Site d'exemple - 10 unités",
+  "description": "Scénario hypothétique, sans lien avec un site réel ni un fabricant.",
+  "nombre_unites": 10,
+  "colonnes": 5,
+  "pas_x_m": 10.0,
+  "pas_y_m": 5.0,
+  "emprise_par_unite_m2": 50.0,
+  "puissance_disponible_kw": 1000.0,
+  "fichier_sortie": "models/site-exemple-10-unites.ifc"
+}
