@@ -372,7 +372,7 @@ def creer_conteneur(modele, corps, niveau, nom, longueur, largeur, hauteur,
     )
 
     # Propriétés de calcul portées par l'assemblage
-    pset = ifcopenshell.api.pset.add_pset(modele, product=assemblage, name="Policloud")
+    pset = ifcopenshell.api.pset.add_pset(modele, product=assemblage, name="ComputeUnit")
     ifcopenshell.api.pset.edit_pset(modele, pset=pset, properties=PROPRIETES)
     return assemblage
 

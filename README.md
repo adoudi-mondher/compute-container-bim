@@ -22,7 +22,7 @@ de puissance de calcul, puis d'automatiser par script ce qui se fait d'habitude 
 **Version 1 : volume simple, fait à la main**
 - Un modèle IFC4 d'un conteneur 20 ft (6,058 x 2,438 x 2,591 m), créé avec Blender et Bonsai.
   C'est un bloc plein, sans détail interne.
-- `scripts/ajouter_proprietes.py` : ajoute un jeu de propriétés `Policloud` au conteneur
+- `scripts/ajouter_proprietes.py` : ajoute un jeu de propriétés `ComputeUnit` au conteneur
   (puissance max, GPU, vCPU, stockage, plage de température, emprise au sol, refroidissement)
   et enregistre le résultat dans un nouveau fichier, sans toucher à l'original.
 
@@ -134,7 +134,7 @@ Les fichiers `.ifc` s'ouvrent dans Blender avec l'extension Bonsai (*Open IFC Pr
 Pour modifier le modèle, relancer le script plutôt qu'enregistrer depuis Blender : Bonsai
 réécrit le fichier IFC.
 
-## Propriétés ajoutées (jeu `Policloud`)
+## Propriétés ajoutées (jeu `ComputeUnit`)
 
 | Propriété | Valeur |
 |---|---|

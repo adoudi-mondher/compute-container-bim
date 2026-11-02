@@ -1,5 +1,5 @@
 """
-ajouter_proprietes.py - Ajoute un jeu de propriétés "Policloud" au conteneur.
+ajouter_proprietes.py - Ajoute un jeu de propriétés "ComputeUnit" au conteneur.
 
 Lit models/policloud-container-20ft.ifc, ajoute les caractéristiques publiques
 du modèle Policloud 100 (source : policloud.com), puis enregistre le résultat
@@ -19,7 +19,7 @@ FICHIER_SORTIE = "models/policloud-container-20ft-enrichi.ifc"
 
 # Nom du jeu de propriétés. Il ne commence pas par "Pset_" car ce préfixe est
 # réservé aux jeux standards de l'IFC ; le nôtre est personnalisé.
-NOM_PSET = "Policloud"
+NOM_PSET = "ComputeUnit"
 
 # Caractéristiques du Policloud 100 (données publiques du fabricant)
 PROPRIETES = {
